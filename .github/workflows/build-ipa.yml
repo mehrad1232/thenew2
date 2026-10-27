@@ -9,7 +9,6 @@ on:
       - '**/*.plist'
       - '**/*.xcodeproj/**'
       - '*.zip'
-      - '.github/workflows/build-ipa.yml'
 
 permissions:
   contents: read
@@ -39,7 +38,7 @@ jobs:
                       path = os.path.join(root, name)
                       print(f'Checking ZIP: {path}')
                       with zipfile.ZipFile(path) as z:
-                          names = [n.replace('\\\\', '/') for n in z.namelist()]
+                          names = [n.replace(chr(92), '/') for n in z.namelist()]
                           if any(n.endswith('.xcodeproj/project.pbxproj') for n in names):
                               print(f'Extracting project archive: {path}')
                               z.extractall('.')
