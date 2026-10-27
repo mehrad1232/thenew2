@@ -9,6 +9,7 @@ on:
       - '**/*.plist'
       - '**/*.xcodeproj/**'
       - '*.zip'
+      - '.github/workflows/build-ipa.yml'
 
 permissions:
   contents: read
@@ -41,7 +42,18 @@ jobs:
                           names = [n.replace(chr(92), '/') for n in z.namelist()]
                           if any(n.endswith('.xcodeproj/project.pbxproj') for n in names):
                               print(f'Extracting project archive: {path}')
-                              z.extractall('.')
+                              import pathlib, shutil
+                              for info in z.infolist():
+                                  normalized = info.filename.replace(chr(92), '/')
+                                  target = os.path.abspath(os.path.join('.', normalized))
+                                  if os.path.commonpath([os.path.abspath('.'), target]) != os.path.abspath('.'):
+                                      raise RuntimeError(f'Unsafe ZIP path: {info.filename}')
+                                  if info.is_dir() or normalized.endswith('/'):
+                                      os.makedirs(target, exist_ok=True)
+                                  else:
+                                      os.makedirs(os.path.dirname(target), exist_ok=True)
+                                      with z.open(info) as src, open(target, 'wb') as dst:
+                                          shutil.copyfileobj(src, dst)
                               raise SystemExit(0)
           print('No ZIP containing an Xcode project was found; checking repository files.')
           PY
