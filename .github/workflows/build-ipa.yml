@@ -74,6 +74,20 @@ jobs:
           PROJECT_DIR="$(dirname "$PROJECT_FILE")"
           echo "PROJECT_PATH=$PROJECT_FILE" >> "$GITHUB_ENV"
           echo "PROJECT_DIR=$PROJECT_DIR" >> "$GITHUB_ENV"
+          # Repair a malformed key found in the uploaded project file.
+          python3 - "$PROJECT_FILE/project.pbxproj" <<'PY'
+          import pathlib, sys
+          p = pathlib.Path(sys.argv[1])
+          s = p.read_text(encoding="utf-8-sig")
+          bad = "BuildIndependentTargets in parallel"
+          good = "BuildIndependentTargetsInParallel"
+          if bad in s:
+              s = s.replace(bad, good)
+              p.write_text(s, encoding="utf-8")
+              print(f"Fixed malformed project setting: {bad} -> {good}")
+          else:
+              print("Malformed project setting not present; no text replacement needed.")
+          PY
           echo "=== project.pbxproj full contents (for parse diagnosis) ==="
           cat "$PROJECT_FILE/project.pbxproj"
           echo "=== Ruby plist parser diagnostic ==="
