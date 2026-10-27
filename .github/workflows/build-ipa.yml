@@ -76,17 +76,18 @@ jobs:
           echo "PROJECT_DIR=$PROJECT_DIR" >> "$GITHUB_ENV"
           # Repair a malformed key found in the uploaded project file.
           python3 - "$PROJECT_FILE/project.pbxproj" <<'PY'
-          import pathlib, re, sys
+          import pathlib, sys
           p = pathlib.Path(sys.argv[1])
           s = p.read_text(encoding="utf-8-sig")
-          good = "BuildIndependentTargetsInParallel"
-          s, count = re.subn(r"BuildIndependentTargets\s+in\s+parallel", good, s)
+          lines = s.splitlines(keepends=True)
+          count = 0
+          for i, line in enumerate(lines):
+              if "BuildIndependentTargets" in line and "parallel" in line and "BuildIndependentTargetsInParallel" not in line:
+                  lines[i] = line[:len(line) - len(line.lstrip())] + "BuildIndependentTargetsInParallel = 1;\n"
+                  count += 1
           if count:
-              p.write_text(s, encoding="utf-8")
-              print(f"Fixed malformed project setting occurrences: {count}")
-          else:
-              print("Malformed project setting pattern not present; leaving file unchanged.")
-          PY
+              p.write_text("".join(lines), encoding="utf-8")
+          print(f"Fixed malformed project setting occurrences: {count}")
           echo "=== project.pbxproj full contents (for parse diagnosis) ==="
           cat "$PROJECT_FILE/project.pbxproj"
           echo "=== Ruby plist parser diagnostic ==="
