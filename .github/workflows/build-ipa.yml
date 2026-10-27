@@ -80,7 +80,7 @@ jobs:
           p = pathlib.Path(sys.argv[1])
           s = p.read_text(encoding="utf-8-sig")
           good = "BuildIndependentTargetsInParallel"
-          s, count = re.subn(r"BuildIndependentTargets\\s+in\\s+parallel", good, s)
+          s, count = re.subn(r"BuildIndependentTargets\s+in\s+parallel", good, s)
           if count:
               p.write_text(s, encoding="utf-8")
               print(f"Fixed malformed project setting occurrences: {count}")
