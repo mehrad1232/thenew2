@@ -88,6 +88,7 @@ jobs:
           if count:
               p.write_text("".join(lines), encoding="utf-8")
           print(f"Fixed malformed project setting occurrences: {count}")
+          PY
           echo "=== project.pbxproj full contents (for parse diagnosis) ==="
           cat "$PROJECT_FILE/project.pbxproj"
           echo "=== Ruby plist parser diagnostic ==="
