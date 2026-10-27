@@ -74,6 +74,10 @@ jobs:
           PROJECT_DIR="$(dirname "$PROJECT_FILE")"
           echo "PROJECT_PATH=$PROJECT_FILE" >> "$GITHUB_ENV"
           echo "PROJECT_DIR=$PROJECT_DIR" >> "$GITHUB_ENV"
+          echo "=== project.pbxproj first 60 lines ==="
+          sed -n '1,60p' "$PROJECT_FILE/project.pbxproj"
+          echo "=== plist syntax check ==="
+          plutil -lint "$PROJECT_FILE/project.pbxproj" || true
           echo "=== Xcode project list ==="
           xcodebuild -list -project "$PROJECT_FILE"
 
