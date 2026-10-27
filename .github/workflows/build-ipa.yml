@@ -76,17 +76,16 @@ jobs:
           echo "PROJECT_DIR=$PROJECT_DIR" >> "$GITHUB_ENV"
           # Repair a malformed key found in the uploaded project file.
           python3 - "$PROJECT_FILE/project.pbxproj" <<'PY'
-          import pathlib, sys
+          import pathlib, re, sys
           p = pathlib.Path(sys.argv[1])
           s = p.read_text(encoding="utf-8-sig")
-          bad = "BuildIndependentTargets in parallel"
           good = "BuildIndependentTargetsInParallel"
-          if bad in s:
-              s = s.replace(bad, good)
+          s, count = re.subn(r"BuildIndependentTargets\\s+in\\s+parallel", good, s)
+          if count:
               p.write_text(s, encoding="utf-8")
-              print(f"Fixed malformed project setting: {bad} -> {good}")
+              print(f"Fixed malformed project setting occurrences: {count}")
           else:
-              print("Malformed project setting not present; no text replacement needed.")
+              print("Malformed project setting pattern not present; leaving file unchanged.")
           PY
           echo "=== project.pbxproj full contents (for parse diagnosis) ==="
           cat "$PROJECT_FILE/project.pbxproj"
